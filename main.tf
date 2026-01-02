@@ -20,7 +20,7 @@ locals {
 # Automatically get the current region from the provider
 data "aws_region" "current" {}
 
-# 1. DynamoDB Table
+# DynamoDB Table
 resource "aws_dynamodb_table" "receipts" {
   name         = "receipts"
   billing_mode = "PAY_PER_REQUEST"
@@ -41,7 +41,7 @@ resource "aws_dynamodb_table" "receipts" {
   }
 }
 
-# 2. S3 Bucket
+# S3 Bucket
 resource "aws_s3_bucket" "receipt_storage" {
   # This creates: receipt-system-a1b2c3d4 automatically
   bucket        = "receipt-system-${random_id.bucket_suffix.hex}"
@@ -76,14 +76,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
   }
 }
 
-# 3. Zip the Lambda Code
+# Zip the Lambda Code
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_file = "${path.module}/src/lambda_function.py"
   output_path = "${path.module}/src/lambda_function.zip"
 }
 
-# 4. Lambda Function
+# Lambda Function
 resource "aws_lambda_function" "processor" {
   filename      = data.archive_file.lambda_zip.output_path
   function_name = local.lambda_name # Use local variable
@@ -109,7 +109,7 @@ resource "aws_lambda_function" "processor" {
   }
 }
 
-# 5. S3 Trigger Permission
+# S3 Trigger Permission
 resource "aws_lambda_permission" "allow_s3" {
   statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"
@@ -118,7 +118,7 @@ resource "aws_lambda_permission" "allow_s3" {
   source_arn    = aws_s3_bucket.receipt_storage.arn
 }
 
-# 6. S3 Bucket Notification
+# S3 Bucket Notification
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.receipt_storage.id
 
@@ -130,12 +130,12 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   depends_on = [aws_lambda_permission.allow_s3]
 }
 
-# 7. SES Identity (Needs manual email verification after apply)
+# SES Identity (Needs manual email verification after apply)
 resource "aws_ses_email_identity" "email" {
   email = var.user_email
 }
 
-# 8. Create "incoming/" folder in S3 Bucket
+# Create "incoming/" folder in S3 Bucket
 resource "aws_s3_object" "incoming_folder" {
   bucket       = aws_s3_bucket.receipt_storage.id
   key          = "incoming/" # This creates the folder prefix
