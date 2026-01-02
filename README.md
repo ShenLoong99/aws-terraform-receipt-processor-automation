@@ -69,7 +69,7 @@
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="architecture">Architecture</h2>
-
+<img src="assets/receipt-processor-automation.jpg" alt="architecture-diagram" width="800">
 <ol>
   <li><strong>Trigger:</strong> User uploads an image/PDF to the <code>incoming/</code> prefix in S3.</li>
   <li><strong>Processing:</strong> S3 event notification triggers the <strong>Python 3.13 Lambda</strong>.</li>
