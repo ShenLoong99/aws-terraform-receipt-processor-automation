@@ -1,5 +1,15 @@
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project     = "ServerlessReceiptProcessor"
+      Environment = "Development"
+      Owner       = "ShenLoong"
+      ManagedBy   = "Terraform"
+      CostCenter  = "Research-and-Development"
+    }
+  }
 }
 
 # Add this local variable at the top of main.tf
@@ -25,6 +35,10 @@ resource "aws_dynamodb_table" "receipts" {
     name = "date"
     type = "S"
   }
+
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 # 2. S3 Bucket
@@ -36,6 +50,30 @@ resource "aws_s3_bucket" "receipt_storage" {
 
 resource "random_id" "bucket_suffix" {
   byte_length = 4
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
+  bucket = aws_s3_bucket.receipt_storage.id
+
+  rule {
+    id     = "delete-old-receipts-demo"
+    status = "Enabled"
+
+    # Target only the receipts folder
+    filter {
+      prefix = "incoming/"
+    }
+
+    # Delete objects 1 day after creation (shortest possible time)
+    expiration {
+      days = 1
+    }
+
+    # Clean up unfinished uploads to save space
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
+    }
+  }
 }
 
 # 3. Zip the Lambda Code
@@ -52,7 +90,7 @@ resource "aws_lambda_function" "processor" {
   role          = aws_iam_role.lambda_role.arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.13"
-  memory_size   = 128 # Minimum RAM (cheapest/free)
+  memory_size   = 512 # Minimum RAM (cheapest/free)
   timeout       = 180
 
   # DYNAMIC INJECTION:
@@ -107,5 +145,5 @@ resource "aws_s3_object" "incoming_folder" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   # The name MUST follow this exact pattern for Lambda to use it
   name              = "/aws/lambda/${local.lambda_name}"
-  retention_in_days = 1 # Automatically deletes old logs to save costs
+  retention_in_days = 7 # Automatically deletes old logs to save costs
 }

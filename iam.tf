@@ -36,7 +36,7 @@ resource "aws_iam_policy" "lambda_policy" {
       {
         Action   = ["ses:SendEmail", "ses:SendRawEmail"]
         Effect   = "Allow"
-        Resource = "*"
+        Resource = aws_ses_email_identity.email.arn
       },
       {
         Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
