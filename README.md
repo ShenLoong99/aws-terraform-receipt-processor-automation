@@ -193,7 +193,7 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;
     <img src="assets/dynamodb-stored-items.png" alt="dynamodb-stored-items" width="800"/>
   </li>
   <li>
-    <strong>Verify Email:</strong> You will receive an email summary of the extracted data.<br>
+    <strong>Verify Email:</strong> You will receive an email summary of the extracted data (Check inbox or spam section).<br>
     <img src="assets/receipt-summary-email.png" alt="receipt-summary-email" width="800"/>
   </li>
   <li>
