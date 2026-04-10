@@ -156,7 +156,7 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;
   <li>Set your email address as an environment variable (Required for SES):
     <pre>Terraform Local: enter git bash command below
 export TF_VAR_user_email=&lt;your-email@example.com&gt;
-Terraform Cloud: 
+Terraform Cloud:
 Configure TF_VAR_user_email environment variables in workspace</pre>
   </li>
   <li>
