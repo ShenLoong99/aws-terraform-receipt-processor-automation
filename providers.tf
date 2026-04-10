@@ -22,3 +22,16 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project     = "ServerlessReceiptProcessor"
+      Environment = "Development"
+      Owner       = "ShenLoong"
+      ManagedBy   = "Terraform"
+      CostCenter  = "Research-and-Development"
+    }
+  }
+}
