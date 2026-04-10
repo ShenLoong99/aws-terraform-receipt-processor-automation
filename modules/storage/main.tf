@@ -44,7 +44,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
 resource "aws_s3_bucket_versioning" "versioning_receipt_storage" {
   bucket = aws_s3_bucket.receipt_storage.id
   versioning_configuration {
-    status = "Enabled"
+    status     = "Enabled"
+    mfa_delete = "Disabled"
   }
 }
 
