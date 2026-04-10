@@ -14,28 +14,30 @@ resource "random_id" "bucket_suffix" {
 resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
   bucket = aws_s3_bucket.receipt_storage.id
 
+  # Manage Object Expiration
   rule {
     id     = "delete-old-receipts-demo"
     status = "Enabled"
 
-    # Target only the receipts folder
     filter {
       prefix = "incoming/"
     }
 
-    # Delete objects 1 day after creation (shortest possible time)
     expiration {
       days = 1
     }
+  }
 
-    # Abort failed uploads after 7 days to save money
+  # Dedicated Multipart Upload Cleanup
+  rule {
+    id     = "abort-failed-uploads"
+    status = "Enabled"
+
+    # Apply to the entire bucket
+    filter {}
+
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
-    }
-
-    # If you enabled versioning, delete non-current versions after 7 days
-    noncurrent_version_expiration {
-      noncurrent_days = 7
     }
   }
 }
@@ -44,8 +46,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
 resource "aws_s3_bucket_versioning" "versioning_receipt_storage" {
   bucket = aws_s3_bucket.receipt_storage.id
   versioning_configuration {
-    status     = "Enabled"
-    mfa_delete = "Disabled"
+    status = "Enabled"
   }
 }
 
