@@ -60,7 +60,7 @@ jobs:
           action: wait
           token: ${{ secrets.TF_API_TOKEN }}
           organization: "my-terraform-aws-projects-2025"
-          workspace: "AWS-Cloud-Fun-Facts-Generator" # Update this to match your TFC workspace name
+          workspace: "receipt-processor-automation" # Update this to match your TFC workspace name
           clone_url: ${{ github.server_url }}/${{ github.repository }}.git
           commit_sha: ${{ github.sha }}
           branch: "main"
