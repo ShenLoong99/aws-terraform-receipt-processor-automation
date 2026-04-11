@@ -97,6 +97,11 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow"
         # Reference the Log Group directly
         Resource = "${aws_cloudwatch_log_group.lambda_logs.arn}:*"
+      },
+      {
+        Action   = ["sqs:SendMessage"]
+        Effect   = "Allow"
+        Resource = aws_sqs_queue.lambda_dlq.arn
       }
     ]
   })
