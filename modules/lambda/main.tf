@@ -15,6 +15,14 @@ resource "aws_lambda_function" "processor" {
   memory_size   = 512 # Minimum RAM (cheapest/free)
   timeout       = 180
 
+  tracing_config {
+    mode = "Active"
+  }
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
   # DYNAMIC INJECTION:
   environment {
     variables = {
@@ -29,6 +37,12 @@ resource "aws_lambda_function" "processor" {
       SES_RECIPIENT_EMAIL = var.user_email
     }
   }
+}
+
+# Create the SQS Queue to act as the DLQ
+resource "aws_sqs_queue" "lambda_dlq" {
+  name                    = "receipt-processing-lambda-dlq"
+  sqs_managed_sse_enabled = true
 }
 
 # IAM Role for Lambda

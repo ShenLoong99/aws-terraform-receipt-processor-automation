@@ -14,25 +14,61 @@ resource "random_id" "bucket_suffix" {
 resource "aws_s3_bucket_lifecycle_configuration" "receipt_lifecycle" {
   bucket = aws_s3_bucket.receipt_storage.id
 
+  # Manage Object Expiration
   rule {
     id     = "delete-old-receipts-demo"
     status = "Enabled"
 
-    # Target only the receipts folder
     filter {
       prefix = "incoming/"
     }
 
-    # Delete objects 1 day after creation (shortest possible time)
     expiration {
       days = 1
     }
+  }
 
-    # Clean up unfinished uploads to save space
+  # Dedicated Multipart Upload Cleanup
+  rule {
+    id     = "abort-failed-uploads"
+    status = "Enabled"
+
+    # Apply to the entire bucket
+    filter {}
+
     abort_incomplete_multipart_upload {
-      days_after_initiation = 1
+      days_after_initiation = 7
     }
   }
+}
+
+# Enable versioning on the S3 bucket
+resource "aws_s3_bucket_versioning" "versioning_receipt_storage" {
+  bucket = aws_s3_bucket.receipt_storage.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Enable server-side encryption by default
+resource "aws_s3_bucket_server_side_encryption_configuration" "sse" {
+  bucket = aws_s3_bucket.receipt_storage.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# Block all public access to the bucket
+resource "aws_s3_bucket_public_access_block" "receipt_storage_access" {
+  bucket = aws_s3_bucket.receipt_storage.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 # S3 Trigger Permission
