@@ -5,12 +5,14 @@ module "database" {
   source = "./modules/database"
 }
 
+# storage module (S3)
 module "storage" {
   source               = "./modules/storage"
   lambda_function_name = module.lambda.lambda_function_name
   lambda_function_arn  = module.lambda.lambda_function_arn
 }
 
+# lambda module (Lambda)
 module "lambda" {
   source      = "./modules/lambda"
   aws_region  = var.aws_region
