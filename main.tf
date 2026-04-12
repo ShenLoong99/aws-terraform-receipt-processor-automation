@@ -12,7 +12,7 @@ module "storage" {
   lambda_function_arn  = module.lambda.lambda_function_arn
 }
 
-# lambda module (Lambda) test
+# lambda module (Lambda)
 module "lambda" {
   source      = "./modules/lambda"
   aws_region  = var.aws_region

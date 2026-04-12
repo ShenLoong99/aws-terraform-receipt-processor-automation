@@ -1,6 +1,7 @@
 import boto3
 import os
 import uuid
+import response
 from datetime import datetime
 
 # AUTO-PULL from Environment (Provisioned by Terraform)
@@ -54,13 +55,22 @@ def lambda_handler(event, context):
         })
         print("Successfully saved to DynamoDB.")
 
-        # Send Summary Email
-        body = f"New Receipt Processed!\nVendor: {extracted.get('VENDOR_NAME')}\nTotal: {extracted.get('TOTAL')}"
-        ses.send_email(
-            Source=SENDER,
-            Destination={'ToAddresses': [SENDER]},
-            Message={'Subject': {'Data': 'Receipt Summary'}, 'Body': {'Text': {'Data': body}}}
-        )
+        print(f"DEBUG: Attempting to send email via SES to {SENDER}...")
+
+        try:
+            response = ses.send_email(
+                Source=SENDER,
+                Destination={'ToAddresses': [SENDER]},
+                Message={
+                    'Subject': {'Data': 'Receipt Summary'},
+                    'Body': {'Text': {'Data': body}}
+                }
+            )
+            print(f"SUCCESS: Email sent! Message ID: {response['MessageId']}")
+        except Exception as ses_err:
+            print(f"ERROR: SES failed to send email. Reason: {str(ses_err)}")
+
+        return {"statusCode": 200, "body": "Process complete"}
 
     except Exception as e:
         print(f"ERROR: Processing failed. Reason: {str(e)}") # Detailed error logging
